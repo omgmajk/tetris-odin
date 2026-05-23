@@ -1,0 +1,6 @@
+build/
+highscores.txt
+*.exe
+*.bin
+*.pdb
+.DS_Store

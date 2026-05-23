@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
-
-odin build .
+mkdir -p build
+odin build . -out:build/tetris
