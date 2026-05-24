@@ -239,11 +239,34 @@ free_high_scores :: proc(gs: ^GameState) {
         }
     }
 }
-
+/*
+* Old fall speed formula, way too slow. Kept for experimentation.
 fall_speed_for_level :: proc(level: int) -> f32 {
     speed := f32(0.8) - f32(level - 1) * 0.010
     if speed < 0.05 do speed = 0.05 // Cap the max speed for playability.
     return speed
+}
+*/
+
+// NES tetris fall speed formula.
+fall_speed_for_level :: proc(level: int) -> f32 {
+    // Speed values measured in seconds per grid step
+    switch level {
+    case 1:       return 0.80
+    case 2:       return 0.72
+    case 3:       return 0.63
+    case 4:       return 0.55
+    case 5:       return 0.47
+    case 6:       return 0.38
+    case 7:       return 0.30
+    case 8:       return 0.22
+    case 9:       return 0.13
+    case 10..=12: return 0.10 // Level 10-12 speed jump
+    case 13..=15: return 0.08
+    case 16..=18: return 0.07
+    case 19..=28: return 0.05 // NES "Kill Screen" speeds
+    case:         return 0.03 // Beyond level 29
+    }
 }
 
 level_for_lines :: proc(lines: int) -> int {
