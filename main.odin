@@ -309,11 +309,11 @@ draw :: proc(gs: ^GameState) {
 get_level_color :: proc(level: int) -> raylib.Color {
     // Determine how aggressively the color shifts per level.
     // 15 means it will reach pure red by level 17 (255 / 15 = 17).
-    color_loss := u8(level * 15)
+    loss_amount := level * 15
 
     // Calculate the remaining green/blue value, ensuring it doesn't underflow.
-    gb_value := u8(255) - color_loss
-    if gb_value > 255 do gb_value = 0
+    if loss_amount > 255 do loss_amount = 255
+    gb_value := u8(255 - loss_amount)
 
     return raylib.Color{255, gb_value, gb_value, 255}
 }
