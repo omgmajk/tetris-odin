@@ -306,6 +306,18 @@ draw :: proc(gs: ^GameState) {
     }
 }
 
+get_level_color :: proc(level: int) -> raylib.Color {
+    // Determine how aggressively the color shifts per level.
+    // 15 means it will reach pure red by level 17 (255 / 15 = 17).
+    color_loss := u8(level * 15)
+
+    // Calculate the remaining green/blue value, ensuring it doesn't underflow.
+    gb_value := u8(255) - color_loss
+    if gb_value > 255 do gb_value = 0
+
+    return raylib.Color{255, gb_value, gb_value, 255}
+}
+
 draw_right_panel :: proc(gs: ^GameState, ui_x, oy, bs: f32) {
     // We cap the preview block size so it doesn't get too massive on large screens.
     preview_bs := min(bs, f32(BASE_BLOCK_SIZE))
@@ -326,7 +338,7 @@ draw_right_panel :: proc(gs: ^GameState, ui_x, oy, bs: f32) {
 
     // Gameplay Statistics
     raylib.DrawText(fmt.ctprintf("SCORE: %d", gs.score),  i32(ui_x), i32(oy + 310), 20, raylib.WHITE)
-    raylib.DrawText(fmt.ctprintf("LEVEL: %d", gs.level),  i32(ui_x), i32(oy + 340), 20, raylib.SKYBLUE)
+    raylib.DrawText(fmt.ctprintf("LEVEL: %d", gs.level),  i32(ui_x), i32(oy + 340), 20, get_level_color(gs.level))
     raylib.DrawText(fmt.ctprintf("LINES: %d", gs.lines_total), i32(ui_x), i32(oy + 365), 18, raylib.GRAY)
 
     ly := oy + 410
