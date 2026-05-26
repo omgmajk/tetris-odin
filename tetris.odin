@@ -458,13 +458,17 @@ spawn_piece :: proc(gs: ^GameState) {
     gs.lock_timer  = 0
     gs.lock_move_count = 0
 
-    // If the newly spawned piece immediately collides, the player loses.
+    // If the newly spawned piece immediately collides, try spawning it one row higher.
+    // This allows the player to maneuver even if a piece is at the next highest layer.
     if check_collision(gs, gs.current_piece.type, gs.current_piece.pos, gs.current_piece.rotation) {
-        gs.mode = .GameOver
-        play_sound(&gs.audio, gs.audio.game_over)
-        // Switch to name entry if the score qualifies for the top 10.
-        if gs.score > gs.high_scores[9].score {
-            gs.mode = .EnteringName
+        gs.current_piece.pos.y -= 1
+        if check_collision(gs, gs.current_piece.type, gs.current_piece.pos, gs.current_piece.rotation) {
+            gs.mode = .GameOver
+            play_sound(&gs.audio, gs.audio.game_over)
+            // Switch to name entry if the score qualifies for the top 10.
+            if gs.score > gs.high_scores[9].score {
+                gs.mode = .EnteringName
+            }
         }
     }
 }
@@ -478,6 +482,23 @@ stash_piece :: proc(gs: ^GameState) {
         temp := gs.current_piece.type
         gs.current_piece.type = stashed
         gs.stashed_piece_type = temp
+
+        // Reset piece properties for the newly swapped piece.
+        gs.current_piece.pos      = {GRID_WIDTH / 2 - 2, 0}
+        gs.current_piece.rotation = 0
+
+        // If the newly swapped piece immediately collides, try spawning it one row higher.
+        if check_collision(gs, gs.current_piece.type, gs.current_piece.pos, gs.current_piece.rotation) {
+            gs.current_piece.pos.y -= 1
+            if check_collision(gs, gs.current_piece.type, gs.current_piece.pos, gs.current_piece.rotation) {
+                gs.mode = .GameOver
+                play_sound(&gs.audio, gs.audio.game_over)
+                if gs.score > gs.high_scores[9].score {
+                    gs.mode = .EnteringName
+                }
+                return
+            }
+        }
     } else {
         // Nothing was held, so stash current and spawn a new one.
         gs.stashed_piece_type = gs.current_piece.type
@@ -485,9 +506,6 @@ stash_piece :: proc(gs: ^GameState) {
         if gs.mode == .GameOver || gs.mode == .EnteringName do return
     }
 
-    // Reset piece properties for the newly swapped piece.
-    gs.current_piece.pos      = {GRID_WIDTH / 2 - 2, 0}
-    gs.current_piece.rotation = 0
     gs.can_stash  = false
     gs.is_locking = false
     gs.lock_timer = 0
