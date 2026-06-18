@@ -395,6 +395,28 @@ draw_overlay_name :: proc(gs: ^GameState, sw, sh: f32) {
     raylib.DrawText("ENTER to save", i32(sw/2 - 80), i32(sh/2 + 60), 18, raylib.GRAY)
 }
 
+draw_tetromino_block :: proc(rect: raylib.Rectangle, color: Color) {
+    // Base color
+    raylib.DrawRectangleRec(rect, color)
+    
+    // Classic tetris bevels
+    bw := rect.width * 0.15
+    
+    // Highlights
+    raylib.DrawRectangleRec({rect.x, rect.y, rect.width, bw}, {255, 255, 255, 80})
+    raylib.DrawRectangleRec({rect.x, rect.y, bw, rect.height}, {255, 255, 255, 80})
+    
+    // Shadows
+    raylib.DrawRectangleRec({rect.x, rect.y + rect.height - bw, rect.width, bw}, {0, 0, 0, 80})
+    raylib.DrawRectangleRec({rect.x + rect.width - bw, rect.y, bw, rect.height}, {0, 0, 0, 80})
+    
+    // Inner darker border for a deeper block look
+    raylib.DrawRectangleLinesEx({rect.x + bw, rect.y + bw, rect.width - bw*2, rect.height - bw*2}, 2, {0, 0, 0, 80})
+    
+    // Outer black border
+    raylib.DrawRectangleLinesEx(rect, 1, raylib.BLACK)
+}
+
 draw_block :: proc(x, y: int, type: TetrominoType, ox, oy, bs: f32) {
     draw_block_color(x, y, TETROMINO_COLORS[type], ox, oy, bs)
 }
@@ -410,8 +432,7 @@ draw_block_color :: proc(x, y: int, color: Color, ox, oy, bs: f32) {
         bs,
     }
 
-    raylib.DrawRectangleRec(rect, color)
-    raylib.DrawRectangleLinesEx(rect, 1, raylib.BLACK)
+    draw_tetromino_block(rect, color)
 }
 
 draw_preview :: proc(type: TetrominoType, x, y, bs: f32) {
@@ -427,7 +448,6 @@ draw_preview_color :: proc(type: TetrominoType, x, y, bs: f32, color: Color) {
             bs,
             bs,
         }
-        raylib.DrawRectangleRec(rect, color)
-        raylib.DrawRectangleLinesEx(rect, 1, raylib.BLACK)
+        draw_tetromino_block(rect, color)
     }
 }
