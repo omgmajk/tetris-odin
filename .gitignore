@@ -5,3 +5,4 @@ highscores.txt
 *.bin
 *.pdb
 .DS_Store
+ols.json
